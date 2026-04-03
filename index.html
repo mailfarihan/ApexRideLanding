@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexRide — Beta Testing</title>
+    <meta name="description" content="Join the ApexRide closed beta. Track your motorcycle rides, analyze telemetry, and ride together with friends.">
+    <meta property="og:title" content="ApexRide — Join the Beta">
+    <meta property="og:description" content="Automatic ride detection, live telemetry, group rides. Built for motorcycle riders.">
+    <meta property="og:image" content="images/screenshot-map.jpeg">
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #141418;
+            --surface-hover: #1c1c22;
+            --border: #28282f;
+            --text: #f0f0f4;
+            --text-muted: #8c8c9e;
+            --accent: #f57c00;
+            --accent-light: #ffb74d;
+            --accent-dark: #e65100;
+            --accent-glow: rgba(245, 124, 0, 0.2);
+            --accent-glow-strong: rgba(245, 124, 0, 0.35);
+            --gradient: linear-gradient(135deg, #ff9800 0%, #f4511e 100%);
+            --gradient-soft: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(244, 81, 30, 0.08) 100%);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text);
+        }
+        .logo img {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+        }
+        .logo span { color: var(--accent-light); }
+        .nav-cta {
+            background: var(--gradient);
+            color: #fff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .nav-cta:hover { opacity: 0.92; transform: translateY(-1px); }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 1.5rem 4rem;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .hero-content { position: relative; max-width: 720px; }
+        .badge {
+            display: inline-block;
+            background: rgba(245, 124, 0, 0.1);
+            border: 1px solid rgba(245, 124, 0, 0.25);
+            color: var(--accent-light);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.25rem;
+        }
+        .gradient-text {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 520px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient);
+            color: #fff;
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 24px var(--accent-glow);
+            border: none;
+            cursor: pointer;
+        }
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 36px var(--accent-glow-strong);
+        }
+        .hero-cta svg { width: 20px; height: 20px; }
+
+        /* ── Sections ── */
+        section { padding: 5rem 1.5rem; }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-light);
+            margin-bottom: 0.75rem;
+        }
+        .section-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 560px;
+            line-height: 1.7;
+        }
+
+        /* ── Screenshots ── */
+        #screenshots { padding-bottom: 2rem; }
+        .screenshots-scroll {
+            margin-top: 3rem;
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding: 1rem 0 2rem;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .screenshots-scroll::-webkit-scrollbar { height: 6px; }
+        .screenshots-scroll::-webkit-scrollbar-track { background: var(--surface); border-radius: 3px; }
+        .screenshots-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .screenshots-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .screenshot-item {
+            flex: 0 0 auto;
+            scroll-snap-align: center;
+            position: relative;
+        }
+        .screenshot-item img {
+            height: 520px;
+            width: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
+        }
+        .screenshot-item:hover img {
+            transform: scale(1.02);
+        }
+        .screenshot-label {
+            text-align: center;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ── Features ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-top: 3rem;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .feature-card:hover {
+            border-color: var(--accent);
+            background: var(--surface-hover);
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.5rem;
+        }
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+
+        /* ── Steps ── */
+        #join {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        .step {
+            position: relative;
+            padding: 2rem;
+            border-radius: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            transition: border-color 0.3s;
+        }
+        .step:hover { border-color: rgba(245, 124, 0, 0.3); }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--gradient);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        .step h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .step p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.65;
+        }
+        .step-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--accent-light);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: gap 0.2s;
+        }
+        .step-link:hover { gap: 0.6rem; }
+        .step-link svg { width: 16px; height: 16px; }
+
+        /* ── CTA ── */
+        .cta-section { text-align: center; padding: 6rem 1.5rem; }
+        .cta-box {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top center, var(--accent-glow) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        .cta-box > * { position: relative; }
+        .cta-box h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+        }
+        .cta-box p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        /* ── Footer ── */
+        footer {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+            .features-grid, .steps { grid-template-columns: 1fr; }
+            section { padding: 3.5rem 1.25rem; }
+            .screenshot-item img { height: 420px; }
+            .cta-box { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="logo">
+            <img src="images/icon.png" alt="ApexRide">
+            Apex<span>Ride</span>
+        </a>
+        <a href="#join" class="nav-cta">Join Beta</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="badge">Closed Beta</div>
+        <h1>Your Rides.<br><span class="gradient-text">Smarter.</span></h1>
+        <p>ApexRide automatically detects your motorcycle rides, tracks telemetry in real-time, and lets you ride together with friends — all from your pocket.</p>
+        <a href="#join" class="hero-cta">
+            Become a Tester
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+    </div>
+</section>
+
+<!-- Screenshots -->
+<section id="screenshots">
+    <div class="section-inner">
+        <div class="section-label">See It in Action</div>
+        <h2 class="section-title">Real rides, real data</h2>
+        <p class="section-subtitle">Every ride captured with detailed telemetry, route mapping, and event detection.</p>
+
+        <div class="screenshots-scroll">
+            <div class="screenshot-item">
+                <img src="images/screenshot-map.jpeg" alt="Route map with telemetry overlay">
+                <div class="screenshot-label">Route Mapping</div>
+            </div>
+            <div class="screenshot-item">
+                <img src="images/screenshot-telemetry.jpeg" alt="Ride telemetry and stats">
+                <div class="screenshot-label">Ride Telemetry &amp; Stats</div>
+            </div>
+            <div class="screenshot-item">
+                <img src="images/screenshot-events.jpeg" alt="Event detection on map">
+                <div class="screenshot-label">Event Detection</div>
+            </div>
+            <div class="screenshot-item">
+                <img src="images/screenshot-group-ride.jpeg" alt="Group ride with member tracking">
+                <div class="screenshot-label">Group Rides</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+    <div class="section-inner">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">Built for riders</h2>
+        <p class="section-subtitle">Every feature designed around the way you actually ride.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F3CD;</div>
+                <h3>Auto Ride Detection</h3>
+                <p>Automatically detects when you start and stop riding — no need to open the app. Works even when your phone is in your pocket.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F4CA;</div>
+                <h3>Live Telemetry</h3>
+                <p>Speed, lean angle, G-force, and route data recorded in real-time. Review detailed charts and stats after every ride.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F465;</div>
+                <h3>Group Rides</h3>
+                <p>Create or join group rides with friends. See everyone's position on the map, compare telemetry, and scrub through the ride together.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F5FA;</div>
+                <h3>Route Mapping</h3>
+                <p>Every ride mapped with scenic and twisty scores. Discover your best roads and share routes with the community.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x26A1;</div>
+                <h3>Event Detection</h3>
+                <p>Detects hard braking, rapid acceleration, and other events. See them on the map with detailed data like G-force and speed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F512;</div>
+                <h3>Privacy First</h3>
+                <p>Your data stays on your device by default. Cloud sync is optional and you control what gets shared with group ride members.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Join Steps -->
+<section id="join">
+    <div class="section-inner">
+        <div class="section-label">Get Started</div>
+        <h2 class="section-title">Join the closed beta</h2>
+        <p class="section-subtitle">Three quick steps to get ApexRide on your device.</p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Join the Google Group</h3>
+                <p>You need to be a member of the ApexRide Testers group to access the closed testing track on Google Play.</p>
+                <a href="https://groups.google.com/g/apexridetester" target="_blank" rel="noopener" class="step-link">
+                    Join Group
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Accept the Invite</h3>
+                <p>Once you're in the group, click the Play Store testing link below. Accept the invite to become a tester.</p>
+                <a href="https://play.google.com/apps/testing/com.apexride" target="_blank" rel="noopener" class="step-link">
+                    Opt In on Play Store
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Download &amp; Ride</h3>
+                <p>Install ApexRide from the Play Store. Grant the permissions, hop on your bike, and let the app do the rest.</p>
+                <a href="https://play.google.com/store/apps/details?id=com.apexride" target="_blank" rel="noopener" class="step-link">
+                    Get on Play Store
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-box">
+        <h2>Help shape <span class="gradient-text">ApexRide</span></h2>
+        <p>Your feedback during the beta directly influences what we build next. Bugs, ideas, complaints — we want to hear it all.</p>
+        <a href="https://groups.google.com/g/apexridetester" target="_blank" rel="noopener" class="hero-cta">
+            Join the Beta
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+    </div>
+</section>
+
+<footer>
+    &copy; 2026 ApexRide. All rights reserved.
+</footer>
+
+</body>
+</html>
