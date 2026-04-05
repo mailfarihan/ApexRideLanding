@@ -4,6 +4,16 @@ services:
     env: static
     staticPublishPath: ./
     buildCommand: ""
+    domains:
+      - apexride.dev
+      - www.apexride.dev
+    routes:
+      - type: rewrite
+        source: /privacy
+        destination: /privacy.html
+      - type: rewrite
+        source: /terms
+        destination: /terms.html
     headers:
       - path: /*
         name: X-Frame-Options
