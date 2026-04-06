@@ -14,9 +14,9 @@ services:
       - type: rewrite
         source: /terms
         destination: /terms.html
-      - type: redirect
-        source: /ride
-        destination: https://api.apexride.dev/ride
+      - type: rewrite
+        source: /ride*
+        destination: https://api.apexride.dev/ride*
     headers:
       - path: /*
         name: X-Frame-Options
