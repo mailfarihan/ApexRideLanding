@@ -102,6 +102,15 @@
         }
         .ride-card.visible { display: block; }
 
+        /* Map image */
+        .ride-map {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid var(--border);
+        }
+
         .ride-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
@@ -192,6 +201,29 @@
             color: var(--text-muted);
         }
 
+        /* Extra Info */
+        .extra-info {
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .extra-info-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.4rem;
+        }
+        .extra-info-text {
+            font-size: 0.9rem;
+            color: var(--text);
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
         /* Members */
         .members-section {
             border-top: 1px solid var(--border);
@@ -268,6 +300,11 @@
         }
         .cta-sub a { color: var(--accent-light); text-decoration: none; }
         .cta-sub a:hover { text-decoration: underline; }
+        .cta-ended {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+        }
 
         footer {
             text-align: center;
@@ -302,6 +339,7 @@
     <div class="state-msg" id="error" style="display:none;"></div>
 
     <div class="ride-card" id="ride-card">
+        <img class="ride-map" id="ride-map" style="display:none;" alt="Route map">
         <div class="ride-header">
             <div class="ride-status" id="ride-status"></div>
             <h1 class="ride-title" id="ride-title"></h1>
@@ -312,6 +350,10 @@
             <div class="ride-meta" id="ride-meta"></div>
             <p class="ride-description" id="ride-description"></p>
             <div class="tags" id="ride-tags"></div>
+            <div class="extra-info" id="ride-extra-info" style="display:none;">
+                <div class="extra-info-label">Rules &amp; Info</div>
+                <div class="extra-info-text" id="ride-extra-info-text"></div>
+            </div>
         </div>
 
         <div class="members-section">
@@ -319,7 +361,7 @@
             <div class="members-list" id="members-list"></div>
         </div>
 
-        <div class="cta-section">
+        <div class="cta-section" id="cta-section">
             <a class="cta-btn" id="open-app-btn" href="#">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                 Open in ApexRide
@@ -350,18 +392,21 @@
         return;
     }
 
-    // Set up the deep link
+    // Deep link and intent URL for Android
     var deepLink = 'apexride://group-ride/' + encodeURIComponent(rideId);
-    var appBtn = document.getElementById('open-app-btn');
-    appBtn.href = deepLink;
+    var webFallback = 'https://play.google.com/store/apps/details?id=com.apexride';
+    // Android Intent URL: tries app first, falls back to Play Store
+    var intentUrl = 'intent://group-ride/' + encodeURIComponent(rideId) +
+        '#Intent;scheme=apexride;package=com.apexride;S.browser_fallback_url=' +
+        encodeURIComponent(webFallback) + ';end';
 
-    // Try to open the app immediately on mobile
-    if (/android/i.test(navigator.userAgent)) {
-        var iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = deepLink;
-        document.body.appendChild(iframe);
-        setTimeout(function() { document.body.removeChild(iframe); }, 2000);
+    var appBtn = document.getElementById('open-app-btn');
+    var isAndroid = /android/i.test(navigator.userAgent);
+    appBtn.href = isAndroid ? intentUrl : deepLink;
+
+    // On Android, try to open the app immediately
+    if (isAndroid) {
+        window.location.href = intentUrl;
     }
 
     // Fetch ride details from public API
@@ -374,8 +419,15 @@
             loadingEl.style.display = 'none';
             cardEl.classList.add('visible');
 
-            // Update OG meta
+            // Update page title
             document.title = ride.title + ' — ApexRide Group Ride';
+
+            // Map image
+            if (ride.mapImageDarkUrl) {
+                var mapEl = document.getElementById('ride-map');
+                mapEl.src = ride.mapImageDarkUrl;
+                mapEl.style.display = 'block';
+            }
 
             // Status badge
             var statusEl = document.getElementById('ride-status');
@@ -410,10 +462,6 @@
             if (ride.estimatedDistance > 0) {
                 metaHtml += metaItem(routeSvg, 'Distance', ride.estimatedDistance.toFixed(1) + ' km');
             }
-            // Difficulty
-            if (ride.difficulty) {
-                metaHtml += metaItem(signalSvg, 'Difficulty', capitalize(ride.difficulty));
-            }
             document.getElementById('ride-meta').innerHTML = metaHtml;
 
             // Description
@@ -424,14 +472,21 @@
                 descEl.style.display = 'none';
             }
 
-            // Tags
+            // Tags (riding styles)
             var tagsEl = document.getElementById('ride-tags');
             if (ride.ridingStyles && ride.ridingStyles.length) {
                 tagsEl.innerHTML = ride.ridingStyles.map(function(s) {
-                    return '<span class="tag">' + escapeHtml(capitalize(s)) + '</span>';
+                    return '<span class="tag">' + escapeHtml(formatStyle(s)) + '</span>';
                 }).join('');
             } else {
                 tagsEl.style.display = 'none';
+            }
+
+            // Extra Info / Rules
+            if (ride.extraInfo) {
+                var extraEl = document.getElementById('ride-extra-info');
+                extraEl.style.display = 'block';
+                document.getElementById('ride-extra-info-text').textContent = ride.extraInfo;
             }
 
             // Members
@@ -443,12 +498,20 @@
                 if (p.photoUrl) {
                     membersHtml += '<img src="' + escapeHtml(p.photoUrl) + '" alt="">';
                 } else {
-                    membersHtml += '<div class="member-placeholder">' + escapeHtml(p.displayName.charAt(0).toUpperCase()) + '</div>';
+                    membersHtml += '<div class="member-placeholder">' + escapeHtml((p.displayName || 'R').charAt(0).toUpperCase()) + '</div>';
                 }
                 membersHtml += escapeHtml(p.displayName);
                 membersHtml += '</div>';
             });
             document.getElementById('members-list').innerHTML = membersHtml;
+
+            // CTA: hide join button for completed/cancelled rides
+            var ctaSection = document.getElementById('cta-section');
+            if (ride.status === 'completed' || ride.status === 'cancelled') {
+                ctaSection.innerHTML = '<p class="cta-ended">This group ride has ' +
+                    (ride.status === 'completed' ? 'already ended.' : 'been cancelled.') +
+                    '</p><p class="cta-sub">Get <a href="https://play.google.com/store/apps/details?id=com.apexride" target="_blank" rel="noopener">ApexRide</a> to discover upcoming rides.</p>';
+            }
         })
         .catch(function(err) {
             loadingEl.style.display = 'none';
@@ -463,6 +526,10 @@
         return div.innerHTML;
     }
     function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+    function formatStyle(s) {
+        // Convert enum-style names: own_pace -> Own Pace, marshall_lead -> Marshall Lead
+        return s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    }
     function formatDate(d) {
         var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -482,7 +549,6 @@
     var pinSvg = '<svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
     var peopleSvg = '<svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>';
     var routeSvg = '<svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><circle cx="12" cy="19" r="3"/></svg>';
-    var signalSvg = '<svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="8"/><line x1="18" y1="20" x2="18" y2="4"/></svg>';
 })();
 </script>
 
