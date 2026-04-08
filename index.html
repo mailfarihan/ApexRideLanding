@@ -320,6 +320,168 @@
             line-height: 1.65;
         }
 
+        /* ── Roadmap Timeline ── */
+        .roadmap-track {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin-top: 3rem;
+            position: relative;
+        }
+        .roadmap-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 0 0.5rem;
+        }
+        .roadmap-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--border);
+            border: 3px solid var(--bg);
+            margin: 0 auto 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        .roadmap-step.active .roadmap-dot {
+            background: var(--gradient);
+            box-shadow: 0 0 16px var(--accent-glow-strong);
+        }
+        .roadmap-step.active .roadmap-dot::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            animation: pulse-ring 2s ease-out infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+        .roadmap-step::before {
+            content: '';
+            position: absolute;
+            top: 9px;
+            left: -50%;
+            right: 50%;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+        .roadmap-step:first-child::before { display: none; }
+        .roadmap-step.done::before { background: var(--accent); }
+        .roadmap-step.active::before { background: var(--accent); }
+        .roadmap-step.done .roadmap-dot { background: var(--accent); }
+        .roadmap-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text);
+        }
+        .roadmap-step:not(.active):not(.done) .roadmap-label {
+            color: var(--text-muted);
+        }
+        .roadmap-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .roadmap-step.active .roadmap-label {
+            color: var(--accent-light);
+        }
+        .roadmap-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+            margin-top: 0.5rem;
+        }
+        .roadmap-step.active .roadmap-badge {
+            background: rgba(245, 124, 0, 0.15);
+            color: var(--accent-light);
+            border: 1px solid rgba(245, 124, 0, 0.3);
+        }
+        .roadmap-step.done .roadmap-badge {
+            background: rgba(76, 175, 80, 0.12);
+            color: #81c784;
+            border: 1px solid rgba(76, 175, 80, 0.25);
+        }
+
+        /* ── Upcoming Features ── */
+        .upcoming-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+            margin-top: 3rem;
+            counter-reset: upcoming;
+        }
+        .upcoming-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            position: relative;
+            transition: border-color 0.3s, background 0.3s;
+            counter-increment: upcoming;
+        }
+        .upcoming-card:hover {
+            border-color: rgba(245, 124, 0, 0.3);
+            background: var(--surface-hover);
+        }
+        .upcoming-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .upcoming-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(245, 124, 0, 0.1);
+            border: 1px solid rgba(245, 124, 0, 0.2);
+            color: var(--accent-light);
+            font-weight: 800;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .upcoming-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+        .upcoming-card p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+        @media (max-width: 640px) {
+            .roadmap-track { flex-direction: column; gap: 1.5rem; align-items: flex-start; padding-left: 2rem; }
+            .roadmap-step { text-align: left; padding: 0; }
+            .roadmap-dot { margin: 0 0 0.5rem; position: absolute; left: -2rem; top: 0; }
+            .roadmap-step::before { display: none; }
+            .roadmap-step::after {
+                content: '';
+                position: absolute;
+                left: calc(-2rem + 9px);
+                top: 20px;
+                bottom: -1.5rem;
+                width: 2px;
+                background: var(--border);
+                z-index: 1;
+            }
+            .roadmap-step:last-child::after { display: none; }
+            .roadmap-step.done::after, .roadmap-step.active::after { background: var(--accent); }
+        }
+
         /* ── Steps ── */
         #join {
             background: var(--surface);
@@ -532,6 +694,80 @@
                 <div class="feature-icon">&#x1F512;</div>
                 <h3>Privacy First</h3>
                 <p>Your data stays on your device by default. Cloud sync is optional and you control what gets shared with group ride members.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Roadmap -->
+<section id="roadmap">
+    <div class="section-inner">
+        <div class="section-label">Roadmap</div>
+        <h2 class="section-title">Beta to launch</h2>
+        <p class="section-subtitle">Where we are and where we're headed. Help us shape the app before it goes public.</p>
+
+        <div class="roadmap-track">
+            <div class="roadmap-step done">
+                <div class="roadmap-dot"></div>
+                <div class="roadmap-label">Internal Alpha</div>
+                <div class="roadmap-desc">Core ride tracking, telemetry, and event detection.</div>
+                <div class="roadmap-badge">Complete</div>
+            </div>
+            <div class="roadmap-step active">
+                <div class="roadmap-dot"></div>
+                <div class="roadmap-label">Closed Beta</div>
+                <div class="roadmap-desc">Opt-in via Google Play. Group rides, route sharing, and community testing.</div>
+                <div class="roadmap-badge">You are here</div>
+            </div>
+            <div class="roadmap-step">
+                <div class="roadmap-dot"></div>
+                <div class="roadmap-label">Open Beta</div>
+                <div class="roadmap-desc">Public Play Store listing. Expanded features and stability hardening.</div>
+            </div>
+            <div class="roadmap-step">
+                <div class="roadmap-dot"></div>
+                <div class="roadmap-label">Public Release</div>
+                <div class="roadmap-desc">Full launch with all planned features and iOS support.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Features -->
+<section id="upcoming">
+    <div class="section-inner">
+        <div class="section-label">Coming Soon</div>
+        <h2 class="section-title">What's next</h2>
+        <p class="section-subtitle">Features we're actively building. Beta testers get first access.</p>
+
+        <div class="upcoming-grid">
+            <div class="upcoming-card">
+                <div class="upcoming-card-header">
+                    <div class="upcoming-number">1</div>
+                    <h3>Live Location Sharing</h3>
+                </div>
+                <p>Share your real-time position with group ride members. See everyone on the map as you ride — no one gets left behind.</p>
+            </div>
+            <div class="upcoming-card">
+                <div class="upcoming-card-header">
+                    <div class="upcoming-number">2</div>
+                    <h3>Help Rider in Need</h3>
+                </div>
+                <p>Tap to alert nearby riders when you need roadside help. Flat tire, mechanical issue, or just lost — the community has your back.</p>
+            </div>
+            <div class="upcoming-card">
+                <div class="upcoming-card-header">
+                    <div class="upcoming-number">3</div>
+                    <h3>Route Planning</h3>
+                </div>
+                <p>Plan rides in advance with turn-by-turn navigation. Pick roads rated by twistiness and scenery from community data.</p>
+            </div>
+            <div class="upcoming-card">
+                <div class="upcoming-card-header">
+                    <div class="upcoming-number">4</div>
+                    <h3>Crash Detection</h3>
+                </div>
+                <p>Automatic crash detection using phone sensors. Sends your location to emergency contacts if you don't respond within a timeout.</p>
             </div>
         </div>
     </div>
