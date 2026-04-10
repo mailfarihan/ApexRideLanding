@@ -1,10 +1,14 @@
 [{
-  "relation": ["delegate_permission/common.handle_all_urls"],
+  "relation": [
+    "delegate_permission/common.handle_all_urls",
+    "delegate_permission/common.get_login_creds"
+  ],
   "target": {
     "namespace": "android_app",
     "package_name": "com.apexride",
     "sha256_cert_fingerprints": [
-      "9B:F0:BE:6D:E1:54:AB:A1:88:23:83:1D:0E:06:07:CE:3B:0D:F6:E8:54:A5:C9:94:13:4A:D2:D7:B7:38:84:4D"
+      "9B:F0:BE:6D:E1:54:AB:A1:88:23:83:1D:0E:06:07:CE:3B:0D:F6:E8:54:A5:C9:94:13:4A:D2:D7:B7:38:84:4D",
+      "4E:B3:DA:80:C6:F4:8A:5E:78:4D:55:B4:C9:B8:E5:CF:9B:2B:FF:74:E4:ED:34:57:36:50:31:FE:2F:02:B8:E5"
     ]
   }
 }]
